@@ -128,12 +128,8 @@ install_dotfiles() {
 
 install_main() {
   install_dotfiles
-  install_basic_dir "${BASEDIR}/bin" "${HOME}/bin"
   cleanup
 }
-
-# Setup variables
-read_saved_prefs
 
 # Defaults if not passed in or saved.
 # TODO: use flags instead of environment variables.
