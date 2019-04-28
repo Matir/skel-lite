@@ -1,0 +1,70 @@
+# For interactive shells
+HISTFILE=~/.zhistory
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory autocd autopushd extendedglob nohup nomatch histignorespace histlexwords histverify cbases
+unsetopt beep histbeep listbeep flowcontrol
+bindkey -v
+
+# Allow core files
+ulimit -c unlimited
+
+# Completion
+zstyle :compinstall filename "${HOME}/.zshrc"
+zstyle ':completion:*' users root ${USER}
+autoload -Uz compinit && compinit
+
+DIRSTACKSIZE=16
+case $TERM in
+  xterm*)
+    precmd () {print -Pn "\e]0;%n@%m: %~\a"}
+    ;;
+esac
+
+autoload -U colors && colors
+PS1="%{$fg[black]%}[%{$fg[yellow]%}%h%{$fg[black]%}] %{%(!.$fg[red].$fg[green])%}%8>..>%n%>>%{$fg[white]%}@%{$fg[blue]%}%12>..>%m%>>%{$fg[white]%}:%{$fg[green]%}%32<...<%~%<<%{$fg[white]%}%#%{$reset_color%} "
+
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+
+# .profile is universal
+# but after zprezto to use/override anything setup there
+. ~/.profile
+# Deduplicate the path
+typeset -U path
+
+# Keybindings
+bindkey '^[[A' history-search-backward
+bindkey '^[[B' history-search-forward
+# ctrl-arrow keys
+bindkey '^[[1;5C' forward-word
+bindkey '^[[1;5D' backward-word
+bindkey '^P' up-history
+bindkey '^N' down-history
+bindkey '^?' backward-delete-char
+bindkey '^h' backward-delete-char
+# ok, a few convenience bindings
+bindkey '^w' backward-kill-word
+bindkey '^r' history-incremental-search-backward
+
+
+# Source extras and aliases if interactive
+if [[ $- == *i* ]] ; then
+  if [[ -e $HOME/.aliases ]] ; then source $HOME/.aliases ; fi
+  for file in $HOME/.zshrc.d/* ; do source "$file" ; done
+fi
+
+# In case ack is named ack-grep
+if [ -x /usr/bin/ack-grep ] ; then
+  alias ack='/usr/bin/ack-grep'
+fi
+
+# Setup PATH for tools
+PATH=${PATH}:${HOME}/bin/tools
+
+# Most is nice, if we have it
+if command -v most >/dev/null 2>&1; then
+  export PAGER="most"
+fi
+
+# Load any local settings
+if [ -e $HOME/.zshrc.local ] ; then source $HOME/.zshrc.local ; fi
